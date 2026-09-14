@@ -1,5 +1,9 @@
 # KMA Threads
 
+<p align="center">
+  <img src="demo.png" width="700">
+</p>
+
 Ứng dụng mạng xã hội dạng thread, lấy cảm hứng về bố cục và trải nghiệm từ
 [burakorkmez/threads-clone](https://github.com/burakorkmez/threads-clone), nhưng được xây dựng mới với
 FastAPI, PostgreSQL và React/TypeScript.
