@@ -73,6 +73,7 @@ class User(TimestampMixin, Base):
     ai_assistant_enabled: Mapped[bool] = mapped_column(
         Boolean, default=False, server_default="false"
     )
+    google_api_key_encrypted: Mapped[str | None] = mapped_column(Text)
 
     posts: Mapped[list["Post"]] = relationship(back_populates="author", cascade="all, delete-orphan")
 
@@ -107,7 +108,11 @@ class Post(TimestampMixin, Base):
     is_blocked: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
 
     author: Mapped[User] = relationship(back_populates="posts")
-    media: Mapped[list["Media"]] = relationship(back_populates="post", cascade="all, delete-orphan")
+    media: Mapped[list["Media"]] = relationship(
+        back_populates="post",
+        cascade="all, delete-orphan",
+        order_by=lambda: [Media.position, Media.created_at],
+    )
     replies: Mapped[list["Reply"]] = relationship(back_populates="post", cascade="all, delete-orphan")
 
     __table_args__ = (Index("ix_posts_created_at", "created_at"),)
@@ -169,6 +174,7 @@ class Media(TimestampMixin, Base):
     storage_path: Mapped[str] = mapped_column(String(500))
     mime_type: Mapped[str] = mapped_column(String(100))
     size_bytes: Mapped[int] = mapped_column(Integer)
+    position: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
 
     post: Mapped[Post | None] = relationship(back_populates="media")
 

@@ -4,6 +4,7 @@ export type User = {
   is_verified: boolean; followers_count: number; following_count: number; posts_count: number;
   replies_count: number; reposts_count: number;
   is_following: boolean; created_at: string; ai_assistant_enabled?: boolean;
+  has_google_api_key?: boolean;
 };
 
 export type Media = { id: string; url: string; mime_type: string; size_bytes: number; created_at: string };

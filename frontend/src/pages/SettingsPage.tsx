@@ -1,4 +1,4 @@
-import { Bot, Camera, ChevronRight, LoaderCircle, Moon, ShieldCheck, Trash2 } from 'lucide-react';
+import { Bot, Camera, ChevronRight, KeyRound, LoaderCircle, Moon, ShieldCheck, Trash2 } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { api } from '../api';
 import { useAuth } from '../App';
@@ -9,6 +9,8 @@ export function SettingsPage() {
   const { user, setUser, logout } = useAuth();
   const [busy, setBusy] = useState(false);
   const [aiBusy, setAiBusy] = useState(false);
+  const [keyBusy, setKeyBusy] = useState(false);
+  const [googleApiKey, setGoogleApiKey] = useState('');
   const [notice, setNotice] = useState('');
   if (!user) return null;
 
@@ -27,6 +29,24 @@ export function SettingsPage() {
       setNotice((reason as Error).message);
     } finally {
       setBusy(false);
+    }
+  };
+
+  const saveApiKey = async (remove = false) => {
+    if (!remove && !googleApiKey.trim()) return;
+    setKeyBusy(true); setNotice('');
+    try {
+      const next = await api<User>('/users/me', {
+        method: 'PATCH',
+        body: JSON.stringify({ google_api_key: remove ? '' : googleApiKey.trim() }),
+      });
+      persistUser(next);
+      setGoogleApiKey('');
+      setNotice(remove ? 'Đã xóa Google API key.' : 'Đã mã hóa và lưu Google API key.');
+    } catch (reason) {
+      setNotice((reason as Error).message);
+    } finally {
+      setKeyBusy(false);
     }
   };
 
@@ -64,9 +84,31 @@ export function SettingsPage() {
       </div>
       <button className="primary-btn save-btn" disabled={busy}>{busy && <LoaderCircle className="spin" />} Lưu thay đổi</button>
     </form></section>
+    <section className="api-key-card surface">
+      <div className="ai-setting-icon"><KeyRound /></div>
+      <div className="api-key-content">
+        <b>Google Gemini API key</b>
+        <small>Key riêng của bạn dùng cho viết, hỏi đáp, tóm tắt và fact-check bằng Gemini.</small>
+        <div className="api-key-form">
+          <input
+            type="password"
+            autoComplete="off"
+            value={googleApiKey}
+            onChange={(event) => setGoogleApiKey(event.target.value)}
+            placeholder={user.has_google_api_key ? 'Đã cấu hình — nhập key mới để thay thế' : 'Nhập Google API key'}
+            aria-label="Google API key"
+          />
+          <button className="primary-btn" disabled={keyBusy || !googleApiKey.trim()} onClick={() => saveApiKey()}>
+            {keyBusy ? <LoaderCircle className="spin" /> : 'Lưu key'}
+          </button>
+          {user.has_google_api_key && <button className="text-btn danger" disabled={keyBusy} onClick={() => saveApiKey(true)}>Xóa key</button>}
+        </div>
+        <em>Key được mã hóa trước khi lưu và không bao giờ được gửi lại về trình duyệt.</em>
+      </div>
+    </section>
     <section className="ai-setting-card surface">
       <div className="ai-setting-icon"><Bot /></div>
-      <div><b>Gemini AI Assistant</b><small>Fact-check, hỗ trợ viết, hỏi đáp, tóm tắt và gợi ý phản hồi.</small><em>Nội dung bạn yêu cầu phân tích sẽ được gửi tới Google Gemini.</em></div>
+      <div><b>AI Assistant</b><small>Gemini hỗ trợ nội dung; Florence-2-large gợi ý caption trực tiếp từ ảnh.</small><em>Caption ảnh chạy bằng model Hugging Face trên máy chủ.</em></div>
       <button className={user.ai_assistant_enabled ? 'toggle-switch active' : 'toggle-switch'} onClick={toggleAi} disabled={aiBusy} role="switch" aria-checked={Boolean(user.ai_assistant_enabled)} aria-label="Bật hoặc tắt AI Assistant"><span /></button>
     </section>
     {notice && <p className="settings-notice settings-page-notice">{notice}</p>}

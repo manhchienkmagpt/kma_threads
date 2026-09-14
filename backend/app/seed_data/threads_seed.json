@@ -1,0 +1,506 @@
+{
+  "source": "Public profiles on https://www.threads.com",
+  "crawled_at": "2026-09-14T09:23:22.505933+00:00",
+  "posts_per_user": 4,
+  "profiles": [
+    {
+      "username": "zuck",
+      "display_name": "Mark Zuckerberg",
+      "bio": "Mostly superintelligence and MMA takes [AI Threads](http://www.threads.com/search?q=aithreads&serp_type=tags&tag_id=18399895213044171)[UFC Threads](http://www.threads.com/search?q=ufcthreads&serp_type=tags&tag_id=18398478472015746)[AI](http://www.threads.com/search?q=ai&serp_type=tags&tag_id=18392111818029156)[MMA](http://www.threads.com/search?q=mma&serp_type=tags&tag_id=18400625521011745)[memes](http://www.threads.com/search?q=memes&serp_type=tags&tag_id=18402364270062744)",
+      "profile_url": "https://www.threads.com/@zuck",
+      "posts": [
+        {
+          "text": "Introducing @muse, the personal agent that understands your goals and works 24/7 to get things done for you.\nYour Muse gets its own private computer in the cloud to do work for you. We've built new technology so the Muse Secure VM keeps your content safe.\nWe want everyone to have access to personal superintelligence, so we're providing Muse for free for up to 100 million tokens per week.",
+          "timestamp": "2026-09-14T09:23:00.702014+00:00",
+          "source_url": "http://www.threads.com/@zuck/post/DdCYWl7GktV",
+          "media": []
+        },
+        {
+          "text": "Muse Spark 1.3 is rolling out today with frontier performance almost too cheap to meter. This is the biggest jump we've made so far on coding and agentic work. Try it in Muse Code and our API.\nNext up 🍉 and Muse Spark open weights releases coming soon.",
+          "timestamp": "2026-09-02T00:00:00+00:00",
+          "source_url": "http://www.threads.com/@zuck/post/Dcy_A8pGo-m",
+          "media": [
+            {
+              "file": "zuck-2-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 41854
+            }
+          ]
+        },
+        {
+          "text": "Muse Voice Transcribe is MSL's first real-time audio perception model -- rolling out today. SOTA in streaming speech-to-text, it handles speaker diarization, and endpointing natively in a single model.\nSorry, we're having trouble playing this video.\nLearn more",
+          "timestamp": "2026-09-01T00:00:00+00:00",
+          "source_url": "http://www.threads.com/@zuck/post/DcwLClnmOrR",
+          "media": [
+            {
+              "file": "zuck-3-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 2788
+            }
+          ]
+        },
+        {
+          "text": "The model decides when to listen. It waits a little longer on hard words and commits faster on easy ones, using adaptive delay to predict each token and increase accuracy. With adaptive delay, the model is near the pareto front on speed-accuracy tradeoff.",
+          "timestamp": "2026-09-01T00:00:00+00:00",
+          "source_url": "http://www.threads.com/@zuck/post/DcwLjJ9miE3",
+          "media": []
+        }
+      ],
+      "avatar_file": "zuck-avatar.webp"
+    },
+    {
+      "username": "mosseri",
+      "display_name": "Adam Mosseri",
+      "bio": "Father of three boys, married to an amazing woman, head of Instagram and supporter of Threads.",
+      "profile_url": "https://www.threads.com/@mosseri",
+      "posts": [
+        {
+          "text": "#photodump from this summer now that we’re back in California and the boys are back in school",
+          "timestamp": "2026-09-14T09:23:02.886282+00:00",
+          "source_url": "https://www.threads.com/@mosseri",
+          "media": [
+            {
+              "file": "mosseri-1-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 114864
+            },
+            {
+              "file": "mosseri-1-2.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 24890
+            },
+            {
+              "file": "mosseri-1-3.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 60432
+            },
+            {
+              "file": "mosseri-1-4.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 60532
+            }
+          ]
+        },
+        {
+          "text": "Thought I’d share this on Threads to and see what the hot takes might be. We updated the Instagram wordmark today, which is more than a decade old and felt dated. We feel the refresh is sharper and more modern, but references the original and has the simplicity and craft that's always made it Instagram.",
+          "timestamp": "2026-09-14T08:23:02.886440+00:00",
+          "source_url": "http://www.threads.com/@mosseri/post/Db_AU3kFko7",
+          "media": [
+            {
+              "file": "mosseri-2-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 8912
+            }
+          ]
+        },
+        {
+          "text": "We’re expanding translations to more languages on Instagram – added Japanese, Korean, French, German, and Italian. You can also now translate both your voice and any on-screen captions in the same reel together, which should make things a lot easier. We’re also rolling out more languages for translations on Facebook, including Bahasa, Indonesian, Arabic, French, Vietnamese, and Thai. More to come soon.",
+          "timestamp": "2026-09-14T07:23:02.886516+00:00",
+          "source_url": "https://www.threads.com/@mosseri",
+          "media": [
+            {
+              "file": "mosseri-3-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 43512
+            }
+          ]
+        },
+        {
+          "text": "Excited about this launch. I've been really impressed with how quickly the MSL team has been able to improve their first model in such a short amount of time.",
+          "timestamp": "2026-09-14T06:23:02.886596+00:00",
+          "source_url": "https://www.threads.com/@mosseri",
+          "media": [
+            {
+              "file": "mosseri-4-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 4396
+            }
+          ]
+        }
+      ],
+      "avatar_file": "mosseri-avatar.webp"
+    },
+    {
+      "username": "meta",
+      "display_name": "Meta",
+      "bio": "Connect with what you love to make things happen.",
+      "profile_url": "https://www.threads.com/@meta",
+      "posts": [
+        {
+          "text": "brb, cloud watching while my meta glasses play the perfect soundtrack",
+          "timestamp": "2026-09-14T09:23:07.550672+00:00",
+          "source_url": "https://www.threads.com/@meta",
+          "media": []
+        },
+        {
+          "text": "you heard it here first. mark your calendar for 9/23 to tune in for the biggest breakthroughs in AI technology, AI glasses, and VR everyone will be talking about.\nlink in bio to sign up for a reminder.",
+          "timestamp": "2026-09-14T08:23:07.550839+00:00",
+          "source_url": "http://www.threads.com/@meta/post/Dc3qTGvDo1F",
+          "media": [
+            {
+              "file": "meta-2-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 112956
+            }
+          ]
+        },
+        {
+          "text": "privacy wasn't an afterthought in our AI glasses—it was the starting point for how they were built. the light that turns on when you’re capturing content is designed to ensure you can stay in the moment, while helping people around you understand when the glasses are capturing.\ntune in for the full story behind the light.",
+          "timestamp": "2026-09-14T07:23:07.550918+00:00",
+          "source_url": "https://www.threads.com/@meta",
+          "media": [
+            {
+              "file": "meta-3-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 42388
+            }
+          ]
+        },
+        {
+          "text": "Mr.  is a full-time Norwegian landscape painter and content creator who brings wild, glowing scenes from memory and imagination to life on canvas. Mr. Ingulstad uses  and  to showcase his creative process through Reels, Stories, and Facebook Groups, converting digital connections into real-world artistic partnerships.",
+          "timestamp": "2026-09-14T06:23:07.551000+00:00",
+          "source_url": "http://www.threads.com/@meta/post/Dct1C3IFEiI",
+          "media": [
+            {
+              "file": "meta-4-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 102612
+            }
+          ]
+        }
+      ],
+      "avatar_file": "meta-avatar.webp"
+    },
+    {
+      "username": "threads",
+      "display_name": "Threads",
+      "bio": "Come see what everyone’s talking about 💬",
+      "profile_url": "https://www.threads.com/@threads",
+      "posts": [
+        {
+          "text": "I reread Twilight every fall and I refuse to explain myself",
+          "timestamp": "2026-09-14T09:23:10.313117+00:00",
+          "source_url": "https://www.threads.com/@threads",
+          "media": []
+        },
+        {
+          "text": "Practical Magic was just a family group chat with spells",
+          "timestamp": "2026-09-14T08:23:10.313227+00:00",
+          "source_url": "https://www.threads.com/@threads",
+          "media": []
+        },
+        {
+          "text": "Tennis fans, clear the weekend 🎾",
+          "timestamp": "2026-09-14T07:23:10.313246+00:00",
+          "source_url": "https://www.threads.com/@threads",
+          "media": []
+        },
+        {
+          "text": "🧵A tip for anyone looking to grow here: Replies account for half the views on Threads, and replying to people under your own thread helps keep the conversation going.",
+          "timestamp": "2026-09-14T06:23:10.313265+00:00",
+          "source_url": "https://www.threads.com/@threads",
+          "media": []
+        }
+      ],
+      "avatar_file": "threads-avatar.webp"
+    },
+    {
+      "username": "instagram",
+      "display_name": "Instagram",
+      "bio": "Discover what's new on Instagram 🔎✨",
+      "profile_url": "https://www.threads.com/@instagram",
+      "posts": [
+        {
+          "text": "resharing ’s Algo Confessions just cuz 🤭",
+          "timestamp": "2026-09-14T09:23:10.548499+00:00",
+          "source_url": "https://www.threads.com/@instagram",
+          "media": []
+        },
+        {
+          "text": "brb adding all our fav tagged posts to grid – yes, you can do that now 🙂‍↕️",
+          "timestamp": "2026-09-14T07:23:10.548701+00:00",
+          "source_url": "http://www.threads.com/@instagram/post/DdHU5MsG2jr",
+          "media": [
+            {
+              "file": "instagram-2-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 86456
+            }
+          ]
+        },
+        {
+          "text": "every room in this drawing by  is its own little world 🖊️",
+          "timestamp": "2026-09-14T06:23:10.548785+00:00",
+          "source_url": "https://www.threads.com/@instagram",
+          "media": [
+            {
+              "file": "instagram-3-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 93328
+            }
+          ]
+        },
+        {
+          "text": "giving one-man band energy 🎶",
+          "timestamp": "2026-09-14T05:23:10.548853+00:00",
+          "source_url": "https://www.threads.com/@instagram",
+          "media": [
+            {
+              "file": "instagram-4-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 23442
+            }
+          ]
+        }
+      ],
+      "avatar_file": "instagram-avatar.webp"
+    },
+    {
+      "username": "google",
+      "display_name": "Google",
+      "bio": "Here to help 🔍",
+      "profile_url": "https://www.threads.com/@google",
+      "posts": [
+        {
+          "text": "We’re sharing three helpful ways Gemini can help you navigate tough bureaucratic hoops, like renewing a driver’s license or preparing your taxes. ↓ 🧵",
+          "timestamp": "2026-09-14T09:23:12.015161+00:00",
+          "source_url": "http://www.threads.com/@google/post/DdH4jVqAFvE",
+          "media": [
+            {
+              "file": "google-1-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 30566
+            }
+          ]
+        },
+        {
+          "text": "📃 Filing forms and paying fees\nGemini can act as a translator for confusing government language, helping you break down step-by-step requirements before you fill out forms or head to a local agency.\nTry this prompt: I’m registering a newly purchased car in ______. Can you give me a simple, step-by-step checklist of the documents, fees, and forms I need to prepare before visiting the DMV?",
+          "timestamp": "2026-09-14T08:23:12.015270+00:00",
+          "source_url": "https://www.threads.com/@google",
+          "media": []
+        },
+        {
+          "text": "☑️ Participating in civic life\nFrom jury duty to voting procedures, Gemini can help break down local rules and outline an action plan for you.\nTry this prompt: I have upcoming jury duty in ______ for the first time. What should I expect from the selection process, what to bring, and general court protocols?",
+          "timestamp": "2026-09-14T07:23:12.015313+00:00",
+          "source_url": "https://www.threads.com/@google",
+          "media": []
+        },
+        {
+          "text": "🤝 Accessing social services\nGemini can summarize the eligibility criteria for different social and public services so you can prepare your applications with confidence.\nTry this prompt: Can you explain how the Social Security Disability Insurance (SSDI) application process works and list the key medical and work history documents needed to apply?",
+          "timestamp": "2026-09-14T06:23:12.015341+00:00",
+          "source_url": "https://www.threads.com/@google",
+          "media": []
+        }
+      ],
+      "avatar_file": "google-avatar.webp"
+    },
+    {
+      "username": "microsoft",
+      "display_name": "Microsoft",
+      "bio": "here for a good time, not a sync [](https://www.instagram.com/microsoft/)",
+      "profile_url": "https://www.threads.com/@microsoft",
+      "posts": [
+        {
+          "text": "are you procrastinating?",
+          "timestamp": "2026-05-04T00:00:00+00:00",
+          "source_url": "http://www.threads.com/@microsoft/post/DX7GpNOmtMG",
+          "media": []
+        },
+        {
+          "text": "this means you won the day",
+          "timestamp": "2026-04-21T00:00:00+00:00",
+          "source_url": "http://www.threads.com/@microsoft/post/DXZnfPxjur3",
+          "media": [
+            {
+              "file": "microsoft-2-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 10444
+            }
+          ]
+        },
+        {
+          "text": "There’s always one Excel sheet that runs the entire company and nobody knows how it works",
+          "timestamp": "2026-03-26T00:00:00+00:00",
+          "source_url": "http://www.threads.com/@microsoft/post/DWWrpJFFja4",
+          "media": []
+        },
+        {
+          "text": "Reflect, sip, repeat. 💜 msft.it/6002Q….",
+          "timestamp": "2026-03-23T00:00:00+00:00",
+          "source_url": "http://www.threads.com/@microsoft/post/DWO85d5DhFA",
+          "media": [
+            {
+              "file": "microsoft-4-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 27450
+            }
+          ]
+        }
+      ],
+      "avatar_file": "microsoft-avatar.webp"
+    },
+    {
+      "username": "github",
+      "display_name": "GitHub",
+      "bio": "The AI-powered developer platform to build, scale, and deliver secure software. [](https://www.instagram.com/github/)",
+      "profile_url": "https://www.threads.com/@github",
+      "posts": [
+        {
+          "text": "Large changes are hard to review. Smaller pull requests make them easier to ship.\nStacked PRs are now in GitHub. It only took us a minute. github.blog/chang…\nVideo 4",
+          "timestamp": "2026-07-30T00:00:00+00:00",
+          "source_url": "http://www.threads.com/@github/post/DbbiFaXgaMA",
+          "media": [
+            {
+              "file": "github-1-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 2814
+            }
+          ]
+        },
+        {
+          "text": "Be honest. How many tabs do you have open alongside your pull request? 👀\nSometimes you need context or answers to questions outside the platform, but GitHub agent apps can bring that context where you already are.\nYou can use services you depend on, like Amplitude, Endor Labs, LaunchDarkly, and PagerDuty, without ever leaving GitHub. 👇 github.blog/ai-an…\ngithub.blog How to bring your software delivery workflow into GitHub with agent apps",
+          "timestamp": "2026-09-14T08:23:13.418557+00:00",
+          "source_url": "http://www.threads.com/@github/post/DdPmfEDndXG",
+          "media": [
+            {
+              "file": "github-2-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 21796
+            },
+            {
+              "file": "github-2-2.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 1116
+            }
+          ]
+        },
+        {
+          "text": "Today is for the programmers 🍻\nVideo 5",
+          "timestamp": "2026-09-14T07:23:13.418678+00:00",
+          "source_url": "http://www.threads.com/@github/post/DdPKG4mGAwO",
+          "media": [
+            {
+              "file": "github-3-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 2814
+            }
+          ]
+        },
+        {
+          "text": "GitHubUniverse\nWouldn't be GitHubUniverse without a hackable badge 🧑‍💻\nGrab your in-person pass and secure your badge. githubuniverse.com…\nVideo 6",
+          "timestamp": "2026-09-14T06:23:13.418759+00:00",
+          "source_url": "http://www.threads.com/@github/post/DdMyl6jCuyM",
+          "media": [
+            {
+              "file": "github-4-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 40892
+            }
+          ]
+        }
+      ],
+      "avatar_file": "github-avatar.webp"
+    },
+    {
+      "username": "nasa",
+      "display_name": "NASA",
+      "bio": "Making the seemingly impossible, possible. ✨",
+      "profile_url": "https://www.threads.com/@nasa",
+      "posts": [
+        {
+          "text": "25 years ago, the Sept. 11th tragedy left us forever changed. Today, we pause to remember the Americans who lost their lives — as well as the survivors and the heroes of that day.\nWe will never forget.",
+          "timestamp": "2026-09-14T09:23:18.083100+00:00",
+          "source_url": "https://www.threads.com/@nasa",
+          "media": []
+        },
+        {
+          "text": "Curly-haired crew, this one’s for you! 🌀🚀👩🏻‍🦱\nJoin NASA astronaut Jessica Meir in her temporary home on the International Space Station, where curls are even more free to be what they want to be.\nWatch this video to see how she cares for her curls in space!\nastro_jessica",
+          "timestamp": "2026-09-14T08:23:18.083288+00:00",
+          "source_url": "https://www.threads.com/@nasa",
+          "media": [
+            {
+              "file": "nasa-2-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 119006
+            }
+          ]
+        },
+        {
+          "text": "It's been a few months since Artemis II splashed down, but Moon Joy doesn't have an expiration date! Press play on our new recap video.",
+          "timestamp": "2026-09-14T07:23:18.083330+00:00",
+          "source_url": "https://www.threads.com/@nasa",
+          "media": []
+        },
+        {
+          "text": "Main character energy unlocked! 👩‍🚀\nNASA astronaut Jessica Meir and  astronaut Sophie Adenot will conduct a spacewalk Tuesday, Sept. 1, with live coverage beginning at 7 a.m. EDT (1100 UTC). Watch with us!",
+          "timestamp": "2026-09-14T06:23:18.083400+00:00",
+          "source_url": "http://www.threads.com/@nasa/post/DcuJp1dkSh3",
+          "media": [
+            {
+              "file": "nasa-4-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 153316
+            }
+          ]
+        }
+      ],
+      "avatar_file": "nasa-avatar.webp"
+    },
+    {
+      "username": "natgeo",
+      "display_name": "National Geographic",
+      "bio": "Step into wonder and find your inner explorer with National Geographic 🌎 [](https://www.instagram.com/natgeo/)",
+      "profile_url": "https://www.threads.com/@natgeo",
+      "posts": [
+        {
+          "text": "Summer school looks a little different for loon chicks. During their first 12 weeks, they learn essential survival skills from their parents, including how to swim, dive, and forage.\nInside The Enchanted Waterways is now streaming on @disneyplus\nVideo 4",
+          "timestamp": "2026-09-14T09:23:21.218021+00:00",
+          "source_url": "http://www.threads.com/@natgeo/post/DdOnsNnkU1B",
+          "media": [
+            {
+              "file": "natgeo-1-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 21856
+            }
+          ]
+        },
+        {
+          "text": "Beauty sleep is important when you’ve got such big shoes to fill 💤\nnatgeoanimals\nTiny steps toward a big future 🐘✨ Even the strongest matriarchs start here. Secrets of the Elephants is streaming on [@disneyplus and @hulu .](http://www.threads.com/@natgeoanimals/post/DdCajbIDcww)\nVideo 5",
+          "timestamp": "2026-09-14T08:23:21.218226+00:00",
+          "source_url": "http://www.threads.com/@natgeo/post/DdMQfUXDc7H",
+          "media": [
+            {
+              "file": "natgeo-2-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 1100
+            },
+            {
+              "file": "natgeo-2-2.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 18998
+            }
+          ]
+        },
+        {
+          "text": "What does it mean to live life after you've been given a second chance? Twenty-five years after 9/11, survivors reflect on the people who helped them make it home.\nSee the reunions in 9/11 Reunited, now streaming on @disneyplus\nand @hulu. For more first-person accounts, explore the National Geographic archive: on.natgeo.com/BRTH0…\nVideo 6",
+          "timestamp": "2026-09-14T07:23:21.218334+00:00",
+          "source_url": "http://www.threads.com/@natgeo/post/DdJyyTvjXNG",
+          "media": [
+            {
+              "file": "natgeo-3-1.webp",
+              "mime_type": "image/webp",
+              "size_bytes": 23468
+            }
+          ]
+        },
+        {
+          "text": "Ever look at a bird and think, \"Yeah, you were definitely a dinosaur?\"",
+          "timestamp": "2026-09-14T06:23:21.218387+00:00",
+          "source_url": "http://www.threads.com/@natgeo/post/DdHpOOGoBrs",
+          "media": []
+        }
+      ],
+      "avatar_file": "natgeo-avatar.webp"
+    }
+  ]
+}

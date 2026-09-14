@@ -62,11 +62,13 @@ export function PostCard({ initial, onDelete }: { initial: Post; onDelete?: (id:
           </div>
         </div>
         <p className="post-content">{post.content}</p>
+        {post.media.length > 0 && <div className={`post-media-grid ${post.media.length === 1 ? 'single' : ''}`}>
         {post.media.map((media) => media.mime_type.startsWith('video/') ? (
           <video key={media.id} className="post-media" controls src={media.url} />
         ) : (
           <img key={media.id} className="post-media" src={media.url} alt="Nội dung thread" />
         ))}
+        </div>}
         <div className="post-actions">
           <button className={post.liked ? 'active-like' : ''} onClick={() => toggle('likes', post.liked)}>
             <Heart fill={post.liked ? 'currentColor' : 'none'} /><span>{post.likes_count || ''}</span>

@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 
 from app import seed
 from app.ai_assistant import AssistantResult, AssistantSource
+from app.api_key_crypto import decrypt_api_key
 from app.image_authenticity import ImageAuthenticityResult, ImageModerationUnavailableError
 from app.models import Media, Post, Reply, Repost, User, UserRole
 from app.routers import ai as ai_router
@@ -134,10 +135,12 @@ def test_ai_assistant_requires_opt_in_and_supports_all_actions(client, registere
     enabled = client.patch(
         "/api/v1/users/me",
         headers=headers,
-        json={"ai_assistant_enabled": True},
+        json={"ai_assistant_enabled": True, "google_api_key": "test-google-key"},
     )
     assert enabled.status_code == 200
     assert enabled.json()["ai_assistant_enabled"] is True
+    assert enabled.json()["has_google_api_key"] is True
+    assert "google_api_key" not in enabled.json()
     assert "ai_assistant_enabled" not in client.get(
         "/api/v1/users/an.nguyen", headers=headers
     ).json()
@@ -170,6 +173,7 @@ def test_ai_assistant_requires_opt_in_and_supports_all_actions(client, registere
     assert fact_check.json()["sources"][0]["title"] == "NASA"
     assert fact_check.json()["disclaimer"]
     assert mocked_gemini.await_count == 5
+    assert all(call.kwargs["api_key"] == "test-google-key" for call in mocked_gemini.await_args_list)
     assert any(call.kwargs.get("use_search") for call in mocked_gemini.await_args_list)
     assert any("kiến thức thiên văn" in call.kwargs["prompt"] for call in mocked_gemini.await_args_list)
 
@@ -232,6 +236,83 @@ def test_image_upload_fails_closed_when_model_is_unavailable(
     assert list(test_upload_dir.iterdir()) == []
 
 
+def test_google_api_key_is_encrypted_and_can_be_removed(client, registered):
+    data, headers = registered
+    saved = client.patch(
+        "/api/v1/users/me",
+        headers=headers,
+        json={"google_api_key": "secret-google-key"},
+    )
+    assert saved.status_code == 200
+    assert saved.json()["has_google_api_key"] is True
+    assert "secret-google-key" not in saved.text
+
+    with TestingSession() as db:
+        user = db.get(User, uuid.UUID(data["user"]["id"]))
+        assert user.google_api_key_encrypted != "secret-google-key"
+        assert decrypt_api_key(user.google_api_key_encrypted) == "secret-google-key"
+
+    removed = client.patch(
+        "/api/v1/users/me",
+        headers=headers,
+        json={"google_api_key": ""},
+    )
+    assert removed.status_code == 200
+    assert removed.json()["has_google_api_key"] is False
+
+
+def test_multiple_media_keep_the_selected_order(client, registered, monkeypatch, test_upload_dir):
+    _, headers = registered
+    monkeypatch.setattr(media_router.settings, "upload_dir", str(test_upload_dir))
+    first = client.post(
+        "/api/v1/media",
+        headers=headers,
+        files={"file": ("first.mp4", b"first video", "video/mp4")},
+    ).json()
+    second = client.post(
+        "/api/v1/media",
+        headers=headers,
+        files={"file": ("second.webm", b"second video", "video/webm")},
+    ).json()
+
+    created = client.post(
+        "/api/v1/posts",
+        headers=headers,
+        json={"content": "Two videos", "media_ids": [second["id"], first["id"]]},
+    )
+    assert created.status_code == 201, created.text
+    assert [item["id"] for item in created.json()["media"]] == [second["id"], first["id"]]
+
+
+def test_florence_caption_uses_an_owned_image(client, registered, monkeypatch, test_upload_dir):
+    _, headers = registered
+    monkeypatch.setattr(media_router.settings, "upload_dir", str(test_upload_dir))
+    monkeypatch.setattr(
+        media_router,
+        "classify_image",
+        lambda _: ImageAuthenticityResult(fake_score=0.03, real_score=0.97),
+    )
+    uploaded = client.post(
+        "/api/v1/media",
+        headers=headers,
+        files={"file": ("photo.png", b"image bytes", "image/png")},
+    ).json()
+    client.patch(
+        "/api/v1/users/me",
+        headers=headers,
+        json={"ai_assistant_enabled": True},
+    )
+    monkeypatch.setattr(ai_router, "suggest_image_caption", lambda _: "A caption from Florence")
+
+    response = client.post(
+        "/api/v1/ai/caption-image",
+        headers=headers,
+        json={"media_id": uploaded["id"]},
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["content"] == "A caption from Florence"
+
+
 def test_admin_moderates_report(client, registered):
     first, headers = registered
     with TestingSession() as db:
@@ -266,14 +347,30 @@ def test_admin_moderates_report(client, registered):
     assert resolved.json()["status"] == "resolved"
 
 
-def test_seed_creates_ten_accounts_with_ten_posts_and_is_idempotent(monkeypatch):
+def test_seed_creates_ten_accounts_with_four_crawled_posts_each_and_is_idempotent(monkeypatch):
     monkeypatch.setattr(seed, "SessionLocal", TestingSession)
+    monkeypatch.setattr(seed.settings, "upload_dir", "uploads")
+    monkeypatch.setattr(seed.settings, "media_base_url", "http://testserver/uploads")
+
+    with TestingSession() as db:
+        legacy_user = User(
+            email="admin.demo@kma.edu.vn",
+            username="admin",
+            display_name="Legacy admin",
+            password_hash="unused",
+        )
+        db.add(legacy_user)
+        db.flush()
+        db.add(Post(author_id=legacy_user.id, content="Legacy seed post"))
+        db.commit()
 
     seed.run()
     seed.run()
 
     with TestingSession() as db:
         assert db.scalar(select(func.count()).select_from(User)) == 10
-        assert db.scalar(select(func.count()).select_from(Post)) == 100
+        assert db.scalar(select(func.count()).select_from(Post)) == 40
+        assert db.scalar(select(func.count()).select_from(Media)) > 0
         assert db.scalar(select(func.count()).select_from(Reply)) == 20
         assert db.scalar(select(func.count()).select_from(Repost)) == 20
+        assert {len(user.posts) for user in db.scalars(select(User)).all()} == {4}

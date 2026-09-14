@@ -17,18 +17,23 @@ router = APIRouter(prefix="/posts", tags=["Post / Thread"])
 def create_post(data: PostCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     media = []
     if data.media_ids:
+        if len(data.media_ids) != len(set(data.media_ids)):
+            raise HTTPException(status_code=400, detail="Media items cannot be duplicated")
         media = db.scalars(
             select(Media).where(
                 Media.id.in_(data.media_ids), Media.owner_id == user.id, Media.post_id.is_(None)
             )
         ).all()
-        if len(media) != len(set(data.media_ids)):
+        if len(media) != len(data.media_ids):
             raise HTTPException(status_code=400, detail="One or more media items are invalid")
+        media_by_id = {item.id: item for item in media}
+        media = [media_by_id[media_id] for media_id in data.media_ids]
     post = Post(author_id=user.id, content=data.content.strip())
     db.add(post)
     db.flush()
-    for item in media:
+    for position, item in enumerate(media):
         item.post_id = post.id
+        item.position = position
     db.commit()
     return post_out(db, get_post_or_404(db, post.id), user)
 

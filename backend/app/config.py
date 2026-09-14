@@ -15,12 +15,14 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:5173"
     debug: bool = False
     upload_dir: str = "uploads"
+    media_base_url: str = "http://localhost:8000/uploads"
     max_upload_mb: int = 25
     deepfake_model: str = "dima806/deepfake_vs_real_image_detection"
     deepfake_threshold: float = Field(default=0.5, ge=0, le=1)
     deepfake_device: str = "cpu"
-    gemini_api_key: SecretStr | None = None
+    api_key_encryption_secret: SecretStr | None = None
     gemini_model: str = "gemini-2.5-flash"
+    florence_model: str = "florence-community/Florence-2-large"
     ai_max_context_replies: int = Field(default=100, ge=1, le=500)
     ai_max_context_chars: int = Field(default=30000, ge=1000, le=100000)
 

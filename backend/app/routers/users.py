@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
+from app.api_key_crypto import encrypt_api_key
 from app.database import get_db
 from app.deps import get_current_user, get_optional_user, pagination
 from app.models import Follow, NotificationType, User, UserStatus
@@ -39,6 +40,10 @@ def get_me(user: User = Depends(get_current_user), db: Session = Depends(get_db)
 @router.patch("/me", response_model=UserMe)
 def update_me(data: UserUpdate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     values = data.model_dump(exclude_unset=True)
+    if "google_api_key" in values:
+        secret = values.pop("google_api_key")
+        api_key = secret.get_secret_value().strip() if secret else ""
+        user.google_api_key_encrypted = encrypt_api_key(api_key) if api_key else None
     if "username" in values:
         values["username"] = values["username"].lower()
         exists = db.scalar(select(User).where(User.username == values["username"], User.id != user.id))

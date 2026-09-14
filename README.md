@@ -25,14 +25,26 @@ Sau khi các container chạy:
 - Health check: http://localhost:8000/health
 - PostgreSQL: `localhost:5432`
 
-Tạo dữ liệu demo (10 tài khoản, mỗi tài khoản 10 bài đăng, kèm trả lời và đăng lại mẫu):
+Tạo dữ liệu demo từ snapshot của 10 hồ sơ Threads công khai (40 bài, đúng 4 bài/tài khoản,
+kèm ảnh được lưu cục bộ, trả lời và đăng lại mẫu):
 
 ```bash
 docker compose exec api python -m app.seed
 ```
 
-Tài khoản demo là `an.nguyen / Password123!`; tài khoản quản trị là
-`admin / Password123!`.
+Tất cả tài khoản seed dùng mật khẩu `Password123!`; tài khoản quản trị là
+`threads / Password123!`. Lệnh seed chạy lặp lại an toàn và tự dọn bộ tài khoản/bài demo cũ.
+
+Snapshot nằm tại `backend/app/seed_data/threads_seed.json`. Để crawl lại 4 bài mới nhất của
+10 hồ sơ đã cấu hình và tải media về snapshot:
+
+```bash
+cd backend
+python -m app.crawl_threads
+```
+
+Crawler chỉ đọc hồ sơ công khai. `THREADS_MEDIA_BASE_URL` phải là URL public trỏ tới route
+`/uploads` của API (mặc định `http://localhost:8000/uploads`).
 
 > Phần kiểm thử tự động dùng SQLite in-memory để cô lập test. Runtime và migration mặc định vẫn dùng
 > PostgreSQL qua `postgresql+psycopg`.
@@ -119,17 +131,16 @@ dữ liệu thực tế và cân nhắc huấn luyện lại model.
 
 AI Assistant là tính năng opt-in theo từng tài khoản và mặc định tắt. Người dùng bật hoặc tắt trong trang
 **Cài đặt**. Khi tắt, frontend ẩn các công cụ AI và backend từ chối toàn bộ endpoint AI của tài khoản đó.
-API key chỉ tồn tại ở backend, không được gửi xuống trình duyệt.
+Mỗi người dùng nhập Google API key của riêng họ trong **Cài đặt**. Backend mã hóa key trước khi lưu database,
+chỉ trả về trạng thái đã/chưa cấu hình và không bao giờ trả lại giá trị key cho frontend. Biến
+`THREADS_API_KEY_ENCRYPTION_SECRET` phải được giữ ổn định; nếu không cấu hình, ứng dụng dùng
+`THREADS_JWT_SECRET` để dẫn xuất khóa mã hóa.
 
-Thêm API key lấy từ Google AI Studio vào `.env`, sau đó restart API:
+Model caption ảnh được tải lazy từ Hugging Face ở lần dùng đầu tiên và dùng chung volume cache:
 
 ```dotenv
-THREADS_GEMINI_API_KEY=your_gemini_api_key
 THREADS_GEMINI_MODEL=gemini-2.5-flash
-```
-
-```bash
-docker compose up -d --build api web
+THREADS_FLORENCE_MODEL=florence-community/Florence-2-large
 ```
 
 Các chức năng:
@@ -140,6 +151,9 @@ Các chức năng:
 - Hỏi đáp RAG trên nội dung một bài đăng và phản hồi của thread đó.
 - Tóm tắt quan điểm đồng thuận, bất đồng và vấn đề còn bỏ ngỏ trong thread.
 - Sinh ba gợi ý phản hồi theo các sắc thái khác nhau.
+- Gợi ý caption từ ảnh đã tải lên bằng Florence-2-large với pipeline `image-text-to-text`. Ứng dụng dùng
+  checkpoint `florence-community/Florence-2-large`, bản native Transformers của Florence-2, để tương thích
+  Transformers v5 và không phải thực thi remote code.
 
 Ngữ cảnh RAG được giới hạn bởi `THREADS_AI_MAX_CONTEXT_REPLIES` (mặc định 100) và
 `THREADS_AI_MAX_CONTEXT_CHARS` (mặc định 30000). Dữ liệu bài đăng/phản hồi được đánh dấu là nội dung

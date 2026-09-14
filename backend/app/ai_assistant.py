@@ -1,6 +1,5 @@
 import logging
 from dataclasses import dataclass, field
-from functools import lru_cache
 from typing import Any
 
 from app.config import settings
@@ -28,15 +27,14 @@ class AssistantResult:
     sources: list[AssistantSource] = field(default_factory=list)
 
 
-@lru_cache(maxsize=1)
-def get_gemini_client():
-    if not settings.gemini_api_key or not settings.gemini_api_key.get_secret_value().strip():
+def get_gemini_client(api_key: str):
+    if not api_key.strip():
         raise AssistantUnavailableError("Gemini API key is not configured")
     try:
         from google import genai
     except ImportError as exc:
         raise AssistantUnavailableError("Google Gen AI SDK is not installed") from exc
-    return genai.Client(api_key=settings.gemini_api_key.get_secret_value())
+    return genai.Client(api_key=api_key)
 
 
 def extract_sources(response: Any) -> list[AssistantSource]:
@@ -61,6 +59,7 @@ def extract_sources(response: Any) -> list[AssistantSource]:
 
 async def generate_response(
     *,
+    api_key: str,
     system_instruction: str,
     prompt: str,
     use_search: bool = False,
@@ -78,7 +77,7 @@ async def generate_response(
         tools=[types.Tool(google_search=types.GoogleSearch())] if use_search else None,
     )
     try:
-        response = await get_gemini_client().aio.models.generate_content(
+        response = await get_gemini_client(api_key).aio.models.generate_content(
             model=settings.gemini_model,
             contents=prompt,
             config=config,

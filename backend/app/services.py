@@ -46,6 +46,7 @@ def user_public(db: Session, user: User, viewer: User | None = None, include_ema
     if include_email:
         values["email"] = user.email
         values["ai_assistant_enabled"] = user.ai_assistant_enabled
+        values["has_google_api_key"] = bool(user.google_api_key_encrypted)
         return UserMe(**values)
     return UserPublic(**values)
 

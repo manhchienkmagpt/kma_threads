@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, SecretStr, model_validator
 
 from app.models import NotificationType, ReportStatus, UserRole, UserStatus
 
@@ -47,6 +47,7 @@ class UserUpdate(BaseModel):
     website: str | None = Field(default=None, max_length=500)
     username: str | None = Field(default=None, min_length=3, max_length=30, pattern=r"^[a-zA-Z0-9_.]+$")
     ai_assistant_enabled: bool | None = None
+    google_api_key: SecretStr | None = Field(default=None, max_length=500)
 
 
 class UserSummary(ORMModel):
@@ -74,6 +75,7 @@ class UserPublic(UserSummary):
 class UserMe(UserPublic):
     email: EmailStr
     ai_assistant_enabled: bool = False
+    has_google_api_key: bool = False
 
 
 class TokenPair(BaseModel):
@@ -94,7 +96,7 @@ class MediaOut(ORMModel):
 
 class PostCreate(BaseModel):
     content: str = Field(default="", max_length=500)
-    media_ids: list[uuid.UUID] = Field(default_factory=list, max_length=4)
+    media_ids: list[uuid.UUID] = Field(default_factory=list, max_length=10)
 
     @model_validator(mode="after")
     def content_or_media(self):
@@ -246,6 +248,10 @@ class AIWritingRequest(BaseModel):
 
 class AIPostQuestionRequest(BaseModel):
     question: str = Field(min_length=2, max_length=500)
+
+
+class AIImageCaptionRequest(BaseModel):
+    media_id: uuid.UUID
 
 
 class AISource(BaseModel):

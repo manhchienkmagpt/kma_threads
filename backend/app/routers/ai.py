@@ -1,6 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -10,12 +11,19 @@ from app.ai_assistant import (
     AssistantUnavailableError,
     generate_response,
 )
+from app.api_key_crypto import APIKeyDecryptionError, decrypt_api_key
 from app.config import settings
 from app.database import get_db
 from app.deps import get_current_user
-from app.models import Reply, User
+from app.image_captioning import (
+    CaptionGenerationError,
+    CaptionModelUnavailableError,
+    suggest_image_caption,
+)
+from app.models import Media, Reply, User
 from app.schemas import (
     AIAssistantResponse,
+    AIImageCaptionRequest,
     AIPostQuestionRequest,
     AISource,
     AIWritingRequest,
@@ -70,9 +78,20 @@ def response_out(result: AssistantResult, disclaimer: str | None = None) -> AIAs
     )
 
 
-async def call_gemini(**kwargs) -> AssistantResult:
+async def call_gemini(user: User, **kwargs) -> AssistantResult:
+    if not user.google_api_key_encrypted:
+        raise HTTPException(
+            status_code=503,
+            detail="Bạn chưa lưu Google API key trong phần Cài đặt.",
+        )
     try:
-        return await generate_response(**kwargs)
+        api_key = decrypt_api_key(user.google_api_key_encrypted)
+        return await generate_response(api_key=api_key, **kwargs)
+    except APIKeyDecryptionError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Không thể đọc Google API key đã lưu. Vui lòng lưu lại key.",
+        ) from exc
     except AssistantUnavailableError as exc:
         raise HTTPException(
             status_code=503,
@@ -86,7 +105,7 @@ async def call_gemini(**kwargs) -> AssistantResult:
 
 
 @router.post("/write", response_model=AIAssistantResponse)
-async def assist_writing(data: AIWritingRequest, _: User = Depends(require_ai_user)):
+async def assist_writing(data: AIWritingRequest, user: User = Depends(require_ai_user)):
     instructions = {
         "rewrite": "Viết lại rõ ràng, tự nhiên và giữ nguyên ý nghĩa.",
         "spellcheck": "Sửa chính tả, ngữ pháp và dấu câu; không đổi ý nghĩa.",
@@ -94,6 +113,7 @@ async def assist_writing(data: AIWritingRequest, _: User = Depends(require_ai_us
         "tone": f"Đổi sang giọng văn {data.tone} và giữ nguyên ý nghĩa.",
     }
     result = await call_gemini(
+        user,
         system_instruction=(
             f"{UNTRUSTED_CONTENT_RULE} Bạn là trợ lý biên tập bài đăng mạng xã hội. "
             "Chỉ trả về phiên bản bài viết hoàn chỉnh, không giải thích, không dùng dấu ngoặc kép. "
@@ -111,11 +131,12 @@ async def assist_writing(data: AIWritingRequest, _: User = Depends(require_ai_us
 @router.post("/posts/{post_id}/fact-check", response_model=AIAssistantResponse)
 async def fact_check_post(
     post_id: uuid.UUID,
-    _: User = Depends(require_ai_user),
+    user: User = Depends(require_ai_user),
     db: Session = Depends(get_db),
 ):
     post = get_post_or_404(db, post_id)
     result = await call_gemini(
+        user,
         system_instruction=(
             f"{UNTRUSTED_CONTENT_RULE} Bạn là trợ lý kiểm chứng thông tin. "
             "Tách các khẳng định có thể kiểm chứng, tìm bằng chứng hiện tại và trình bày: "
@@ -136,11 +157,12 @@ async def fact_check_post(
 async def ask_about_post(
     post_id: uuid.UUID,
     data: AIPostQuestionRequest,
-    _: User = Depends(require_ai_user),
+    user: User = Depends(require_ai_user),
     db: Session = Depends(get_db),
 ):
     context = build_thread_context(db, post_id)
     result = await call_gemini(
+        user,
         system_instruction=(
             f"{UNTRUSTED_CONTENT_RULE} Chỉ trả lời dựa trên dữ liệu thread được cung cấp. "
             "Nếu dữ liệu không đủ, nói rõ là không tìm thấy thông tin trong thread."
@@ -154,11 +176,12 @@ async def ask_about_post(
 @router.post("/posts/{post_id}/summarize", response_model=AIAssistantResponse)
 async def summarize_thread(
     post_id: uuid.UUID,
-    _: User = Depends(require_ai_user),
+    user: User = Depends(require_ai_user),
     db: Session = Depends(get_db),
 ):
     context = build_thread_context(db, post_id)
     result = await call_gemini(
+        user,
         system_instruction=(
             f"{UNTRUSTED_CONTENT_RULE} Tóm tắt trung lập nội dung chính, các quan điểm đồng thuận, "
             "bất đồng và câu hỏi còn bỏ ngỏ. Không gán ý kiến cho người không phát biểu ý đó."
@@ -172,11 +195,12 @@ async def summarize_thread(
 @router.post("/posts/{post_id}/suggest-reply", response_model=AIAssistantResponse)
 async def suggest_reply(
     post_id: uuid.UUID,
-    _: User = Depends(require_ai_user),
+    user: User = Depends(require_ai_user),
     db: Session = Depends(get_db),
 ):
     context = build_thread_context(db, post_id)
     result = await call_gemini(
+        user,
         system_instruction=(
             f"{UNTRUSTED_CONTENT_RULE} Đề xuất 3 phản hồi phù hợp, lịch sự và có ích với ba sắc thái: "
             "đồng cảm, đặt câu hỏi và đóng góp góc nhìn. Mỗi phản hồi tối đa 200 ký tự."
@@ -185,3 +209,29 @@ async def suggest_reply(
         temperature=0.7,
     )
     return response_out(result)
+
+
+@router.post("/caption-image", response_model=AIAssistantResponse)
+async def caption_image(
+    data: AIImageCaptionRequest,
+    user: User = Depends(require_ai_user),
+    db: Session = Depends(get_db),
+):
+    media = db.scalar(select(Media).where(Media.id == data.media_id, Media.owner_id == user.id))
+    if not media:
+        raise HTTPException(status_code=404, detail="Không tìm thấy ảnh.")
+    if not media.mime_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Florence chỉ có thể gợi ý caption cho ảnh.")
+    try:
+        caption = await run_in_threadpool(suggest_image_caption, media.storage_path)
+    except CaptionModelUnavailableError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Model Florence-2-large chưa sẵn sàng. Vui lòng thử lại sau.",
+        ) from exc
+    except CaptionGenerationError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail="Florence-2-large không thể gợi ý caption cho ảnh này.",
+        ) from exc
+    return AIAssistantResponse(content=caption)
