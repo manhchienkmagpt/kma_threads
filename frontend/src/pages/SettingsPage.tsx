@@ -1,9 +1,10 @@
 import { Bot, Camera, ChevronRight, KeyRound, LoaderCircle, Moon, ShieldCheck, Trash2 } from 'lucide-react';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useRef, useState } from 'react';
 import { api } from '../api';
 import { useAuth } from '../App';
 import { Avatar } from '../components/Avatar';
-import type { User } from '../types';
+import { AvatarCropDialog } from '../components/AvatarCropDialog';
+import type { Media, User } from '../types';
 
 export function SettingsPage() {
   const { user, setUser, logout } = useAuth();
@@ -12,6 +13,10 @@ export function SettingsPage() {
   const [keyBusy, setKeyBusy] = useState(false);
   const [googleApiKey, setGoogleApiKey] = useState('');
   const [notice, setNotice] = useState('');
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const avatarInput = useRef<HTMLInputElement>(null);
   if (!user) return null;
 
   const persistUser = (next: User) => {
@@ -66,6 +71,28 @@ export function SettingsPage() {
     }
   };
 
+  const updateAvatar = async (blob: Blob) => {
+    setAvatarBusy(true); setNotice('');
+    let uploaded: Media | null = null;
+    try {
+      const body = new FormData();
+      body.append('file', blob, 'avatar.jpg');
+      uploaded = await api<Media>('/media', { method: 'POST', body });
+      const next = await api<User>('/users/me', {
+        method: 'PATCH',
+        body: JSON.stringify({ avatar_url: uploaded.url }),
+      });
+      persistUser(next);
+      setAvatarFile(null);
+      setNotice('Đã cập nhật ảnh đại diện.');
+    } catch (reason) {
+      if (uploaded) await api(`/media/${uploaded.id}`, { method: 'DELETE' }).catch(() => undefined);
+      setNotice((reason as Error).message);
+    } finally {
+      setAvatarBusy(false);
+    }
+  };
+
   const deactivate = async () => {
     if (!confirm('Tạm vô hiệu hóa tài khoản? Bạn có thể kích hoạt lại bằng cách đăng nhập.')) return;
     await api('/users/me', { method: 'DELETE' }); logout();
@@ -74,12 +101,26 @@ export function SettingsPage() {
   return <>
     <div className="page-header"><p className="eyebrow">TÀI KHOẢN CỦA BẠN</p><h1>Cài đặt</h1></div>
     <section className="settings-card surface"><form onSubmit={save}>
-      <div className="avatar-setting"><div><Avatar user={user} size={74} /><button type="button"><Camera /></button></div><span><b>Ảnh đại diện</b><small>URL ảnh có thể cập nhật bên dưới</small></span></div>
+      <div className="avatar-setting">
+        <div className="avatar-picker">
+          <button type="button" className="avatar-picker-trigger" onClick={() => setAvatarMenuOpen((open) => !open)} aria-label="Mở tùy chọn ảnh đại diện">
+            <Avatar user={user} size={74} /><i><Camera /></i>
+          </button>
+          {avatarMenuOpen && <div className="avatar-picker-menu"><button type="button" onClick={() => { setAvatarMenuOpen(false); avatarInput.current?.click(); }}><Camera /> Thay đổi ảnh đại diện</button></div>}
+          <input
+            ref={avatarInput}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            hidden
+            onChange={(event) => { const file = event.target.files?.[0]; if (file) setAvatarFile(file); event.currentTarget.value = ''; }}
+          />
+        </div>
+        <span><b>Ảnh đại diện</b><small>Nhấp vào ảnh để tải lên và căn chỉnh</small></span>
+      </div>
       <div className="form-grid">
         <label>Tên hiển thị<input name="display_name" defaultValue={user.display_name} /></label>
         <label>Username<input name="username" defaultValue={user.username} /></label>
         <label className="full">Giới thiệu<textarea name="bio" rows={4} maxLength={500} defaultValue={user.bio || ''} /></label>
-        <label className="full">URL ảnh đại diện<input name="avatar_url" defaultValue={user.avatar_url || ''} placeholder="https://..." /></label>
         <label className="full">Website<input name="website" defaultValue={user.website || ''} placeholder="https://..." /></label>
       </div>
       <button className="primary-btn save-btn" disabled={busy}>{busy && <LoaderCircle className="spin" />} Lưu thay đổi</button>
@@ -117,5 +158,6 @@ export function SettingsPage() {
       <button><ShieldCheck /><span><b>Quyền riêng tư</b><small>Quản lý hiển thị tài khoản</small></span><ChevronRight /></button>
       <button className="danger" onClick={deactivate}><Trash2 /><span><b>Vô hiệu hóa tài khoản</b><small>Ẩn hồ sơ và nội dung của bạn</small></span><ChevronRight /></button>
     </section>
+    {avatarFile && <AvatarCropDialog file={avatarFile} busy={avatarBusy} onCancel={() => setAvatarFile(null)} onSave={updateAvatar} />}
   </>;
 }
