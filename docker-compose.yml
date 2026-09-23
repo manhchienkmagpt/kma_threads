@@ -20,10 +20,12 @@ services:
     env_file: .env
     environment:
       THREADS_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-threads}:${POSTGRES_PASSWORD:-threads}@db:5432/${POSTGRES_DB:-threads}
+      THREADS_IMAGE_MODEL_PATH: /models/best_model.pth
       HF_HOME: /root/.cache/huggingface
     command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     volumes:
       - ./backend:/app
+      - ./best_model.pth:/models/best_model.pth:ro
       - huggingface_cache:/root/.cache/huggingface
     ports:
       - "8000:8000"

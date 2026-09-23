@@ -10,7 +10,7 @@ from app.config import settings
 from app.database import get_db
 from app.deps import get_current_user
 from app.image_authenticity import (
-    ImageModerationUnavailableError,
+    ImageAuthenticityUnavailableError,
     InvalidImageError,
     classify_image,
 )
@@ -49,15 +49,15 @@ async def upload_media(
             result = await run_in_threadpool(classify_image, content)
         except InvalidImageError as exc:
             raise HTTPException(status_code=415, detail="Tệp tải lên không phải là ảnh hợp lệ") from exc
-        except ImageModerationUnavailableError as exc:
+        except ImageAuthenticityUnavailableError as exc:
             raise HTTPException(
                 status_code=503,
                 detail="Không thể kiểm tra ảnh lúc này. Vui lòng thử lại sau.",
             ) from exc
-        if result.is_fake:
+        if result.is_ai_generated:
             raise HTTPException(
                 status_code=422,
-                detail="Ảnh bạn vừa tải lên là ảnh fake và không thể đăng lên được.",
+                detail="Ảnh được phát hiện là ảnh do AI tạo và không thể đăng lên được.",
             )
 
     suffix = ALLOWED_TYPES[content_type]

@@ -6,7 +6,7 @@ from sqlalchemy import func, select
 from app import seed
 from app.ai_assistant import AssistantResult, AssistantSource
 from app.api_key_crypto import decrypt_api_key
-from app.image_authenticity import ImageAuthenticityResult, ImageModerationUnavailableError
+from app.image_authenticity import ImageAuthenticityResult, ImageAuthenticityUnavailableError
 from app.models import Media, Post, Reply, Repost, User, UserRole
 from app.routers import ai as ai_router
 from app.routers import media as media_router
@@ -178,7 +178,7 @@ def test_ai_assistant_requires_opt_in_and_supports_all_actions(client, registere
     assert any("kiến thức thiên văn" in call.kwargs["prompt"] for call in mocked_gemini.await_args_list)
 
 
-def test_image_upload_rejects_fake_and_accepts_real(
+def test_image_upload_rejects_ai_generated_and_accepts_real(
     client, registered, monkeypatch, test_upload_dir
 ):
     _, headers = registered
@@ -196,7 +196,7 @@ def test_image_upload_rejects_fake_and_accepts_real(
     )
     assert rejected.status_code == 422
     assert rejected.json()["detail"] == (
-        "Ảnh bạn vừa tải lên là ảnh fake và không thể đăng lên được."
+        "Ảnh được phát hiện là ảnh do AI tạo và không thể đăng lên được."
     )
     assert list(test_upload_dir.iterdir()) == []
 
@@ -224,7 +224,7 @@ def test_image_upload_fails_closed_when_model_is_unavailable(
     monkeypatch.setattr(media_router.settings, "upload_dir", str(test_upload_dir))
 
     def unavailable(_):
-        raise ImageModerationUnavailableError("offline")
+        raise ImageAuthenticityUnavailableError("offline")
 
     monkeypatch.setattr(media_router, "classify_image", unavailable)
     response = client.post(

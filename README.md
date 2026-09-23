@@ -114,22 +114,21 @@ nhóm đường dẫn API.
 - Route admin kiểm tra role ở server; ban/deactivate cũng được kiểm tra tại dependency xác thực.
 - Upload giới hạn loại file và kích thước (`THREADS_MAX_UPLOAD_MB`, mặc định 25 MB).
 
-## Kiểm tra ảnh real/fake
+## Phát hiện ảnh do AI tạo
 
-Mọi ảnh tải lên qua `POST /api/v1/media` được kiểm tra bằng model
-[`dima806/deepfake_vs_real_image_detection`](https://huggingface.co/dima806/deepfake_vs_real_image_detection)
-trước khi ghi file và tạo bản ghi media. Ảnh có điểm `Fake` từ ngưỡng cấu hình trở lên sẽ bị từ chối;
-frontend hiển thị thông báo lỗi màu đỏ và không cho gắn ảnh đó vào bài đăng. Video không đi qua model ảnh.
+Mọi ảnh tải lên qua `POST /api/v1/media` được kiểm tra bằng EfficientNet-B0 đã huấn luyện trong
+`deepfake-ai-generate.ipynb` trước khi ghi file và tạo bản ghi media. Backend nạp trọng số từ
+`best_model.pth`, dùng cùng preprocessing của notebook (resize bilinear `224x224` và ImageNet normalization),
+với thứ tự nhãn `real=0`, `fake=1`. Ảnh có điểm `fake` từ ngưỡng cấu hình trở lên sẽ bị từ chối; frontend
+hiển thị thông báo lỗi và không cho gắn ảnh đó vào bài đăng. Video không đi qua model ảnh.
 
-- `THREADS_DEEPFAKE_MODEL`: model Hugging Face, mặc định là model trên.
-- `THREADS_DEEPFAKE_THRESHOLD`: ngưỡng điểm `Fake`, mặc định `0.5`, hợp lệ từ `0` đến `1`.
-- `THREADS_DEEPFAKE_DEVICE`: thiết bị inference, mặc định `cpu`.
-- Model được tải lười ở lần upload ảnh đầu tiên và cache trong Docker volume `huggingface_cache`.
-  Lần đầu sẽ chậm hơn vì checkpoint khoảng 343 MB cần được tải xuống.
+- `THREADS_IMAGE_MODEL_PATH`: đường dẫn checkpoint, mặc định là `best_model.pth` ở thư mục gốc dự án.
+- `THREADS_AI_GENERATED_THRESHOLD`: ngưỡng điểm `fake`, mặc định `0.5`, hợp lệ từ `0` đến `1`.
+- `THREADS_IMAGE_MODEL_DEVICE`: thiết bị inference của PyTorch, mặc định `cpu` (có thể đặt `cuda`).
+- Model được tải lười ở lần upload ảnh đầu tiên và được giữ trong bộ nhớ cho các lần suy luận sau.
 
-Nếu model không tải được hoặc inference lỗi, API trả `503` và không lưu ảnh. Model card cảnh báo tập dữ liệu
-huấn luyện đã cũ so với các công cụ sinh ảnh hiện tại; với môi trường production nên đánh giá lại ngưỡng trên
-dữ liệu thực tế và cân nhắc huấn luyện lại model.
+Nếu model không tải được hoặc inference lỗi, API trả `503` và không lưu ảnh. Với môi trường production nên
+đánh giá lại ngưỡng trên dữ liệu thực tế trước khi triển khai.
 
 ## Gemini AI Assistant
 
@@ -190,7 +189,7 @@ npm run build
 ```
 
 Test hiện bao phủ đăng ký/đăng nhập/refresh/reset mật khẩu, hồ sơ, post, reply, like, repost, bookmark,
-feed, follow, notification, kiểm tra ảnh real/fake, report và luồng kiểm duyệt admin.
+feed, follow, notification, kiểm tra ảnh real/AI-generated, report và luồng kiểm duyệt admin.
 
 ## Cấu trúc
 

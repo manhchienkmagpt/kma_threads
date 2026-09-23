@@ -1,7 +1,10 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
@@ -17,9 +20,9 @@ class Settings(BaseSettings):
     upload_dir: str = "uploads"
     media_base_url: str = "http://localhost:8000/uploads"
     max_upload_mb: int = 25
-    deepfake_model: str = "dima806/deepfake_vs_real_image_detection"
-    deepfake_threshold: float = Field(default=0.5, ge=0, le=1)
-    deepfake_device: str = "cpu"
+    image_model_path: str = str(PROJECT_ROOT / "best_model.pth")
+    ai_generated_threshold: float = Field(default=0.5, ge=0, le=1)
+    image_model_device: str = "cpu"
     api_key_encryption_secret: SecretStr | None = None
     gemini_model: str = "gemini-2.5-flash"
     florence_model: str = "florence-community/Florence-2-large"
