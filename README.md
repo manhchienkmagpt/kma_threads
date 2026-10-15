@@ -89,15 +89,16 @@ Tất cả route nghiệp vụ dùng prefix `/api/v1`.
 | User | `POST /users`, `GET/PATCH/DELETE /users/me`, `GET /users/{username}` |
 | Follow | `POST/DELETE /users/{id}/follow`, `GET /users/{id}/followers`, `/following` |
 | Post | `POST/GET /posts`, `GET/PATCH/DELETE /posts/{id}` |
+| Short video | `POST /posts` với `is_short=true`, `GET /feed/shorts` |
 | Reply | `POST/GET /posts/{id}/replies`, `PATCH/DELETE /posts/{id}/replies/{reply_id}` |
 | Like | `POST/DELETE/GET /posts/{id}/likes` |
 | Repost | `POST/DELETE/GET /posts/{id}/reposts` |
 | Bookmark | `POST/DELETE /posts/{id}/bookmarks`, `GET /bookmarks` |
 | Media | `POST /media`, `GET/DELETE /media/{id}` |
-| AI Assistant | `POST /ai/write`, `/ai/posts/{id}/fact-check`, `/ask`, `/summarize`, `/suggest-reply` |
+| AI Assistant | `POST /ai/write`, `/ai/caption-image`, `/ai/posts/{id}/fact-check`, `/ask`, `/summarize`, `/suggest-reply` |
 | Notification | `GET /notifications`, `PATCH /notifications/{id}/read`, `PATCH /notifications/read-all` |
 | Search | `GET /search/users?q=...`, `GET /search/posts?q=...` |
-| Feed | `GET /feed/home`, `/feed/following`, `/feed/users/{username}`, `/feed/users/{username}/replies`, `/reposts` |
+| Feed | `GET /feed/home`, `/feed/following`, `/feed/shorts`, `/feed/users/{username}`, `/feed/users/{username}/replies`, `/reposts` |
 | Report | `POST /reports` |
 | Admin | `GET/PATCH /admin/reports`, block/delete post, ban/unban user |
 
@@ -113,6 +114,7 @@ nhóm đường dẫn API.
   trả trong response để phát triển local; production cần nối hook gửi email và để debug là `false`.
 - Route admin kiểm tra role ở server; ban/deactivate cũng được kiểm tra tại dependency xác thực.
 - Upload giới hạn loại file và kích thước (`THREADS_MAX_UPLOAD_MB`, mặc định 25 MB).
+- Short video chỉ nhận đúng một tệp MP4/WebM; giao diện kiểm tra thời lượng tối đa 60 giây trước khi tải lên.
 
 ## Phát hiện ảnh do AI tạo
 
@@ -154,8 +156,10 @@ Các chức năng:
 - Hỏi đáp RAG trên nội dung một bài đăng và phản hồi của thread đó.
 - Tóm tắt quan điểm đồng thuận, bất đồng và vấn đề còn bỏ ngỏ trong thread.
 - Sinh ba gợi ý phản hồi theo các sắc thái khác nhau.
-- Gợi ý caption từ ảnh đã tải lên bằng Florence-2-large với pipeline `image-text-to-text`. Ứng dụng dùng
-  checkpoint `florence-community/Florence-2-large`, bản native Transformers của Florence-2, để tương thích
+- Trò chuyện để tạo và tinh chỉnh caption theo phong cách người dùng yêu cầu. Florence-2-large tạo mô tả
+  tiếng Anh ban đầu từ ảnh bằng pipeline `image-text-to-text`, sau đó Gemini kết hợp mô tả này với yêu cầu
+  trong cuộc trò chuyện để viết caption cuối. Ứng dụng dùng checkpoint
+  `florence-community/Florence-2-large`, bản native Transformers của Florence-2, để tương thích
   Transformers v5 và không phải thực thi remote code.
 
 Ngữ cảnh RAG được giới hạn bởi `THREADS_AI_MAX_CONTEXT_REPLIES` (mặc định 100) và

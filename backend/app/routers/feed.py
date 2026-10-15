@@ -52,6 +52,16 @@ def following_feed(
     return feed_response(db, post_query().where(condition), [condition], user, page)
 
 
+@router.get("/shorts", response_model=PostList)
+def shorts_feed(
+    page: tuple[int, int] = Depends(pagination),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    condition = Post.is_short.is_(True)
+    return feed_response(db, post_query().where(condition), [condition], user, page)
+
+
 @router.get("/users/{username}", response_model=PostList)
 def user_posts(
     username: str,

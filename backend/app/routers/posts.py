@@ -28,7 +28,9 @@ def create_post(data: PostCreate, user: User = Depends(get_current_user), db: Se
             raise HTTPException(status_code=400, detail="One or more media items are invalid")
         media_by_id = {item.id: item for item in media}
         media = [media_by_id[media_id] for media_id in data.media_ids]
-    post = Post(author_id=user.id, content=data.content.strip())
+    if data.is_short and not media[0].mime_type.startswith("video/"):
+        raise HTTPException(status_code=400, detail="A short post must contain a video")
+    post = Post(author_id=user.id, content=data.content.strip(), is_short=data.is_short)
     db.add(post)
     db.flush()
     for position, item in enumerate(media):

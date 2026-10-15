@@ -1,5 +1,5 @@
 import uuid
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock
 
 from sqlalchemy import func, select
 
@@ -284,7 +284,76 @@ def test_multiple_media_keep_the_selected_order(client, registered, monkeypatch,
     assert [item["id"] for item in created.json()["media"]] == [second["id"], first["id"]]
 
 
-def test_florence_caption_uses_an_owned_image(client, registered, monkeypatch, test_upload_dir):
+def test_create_short_video_and_list_shorts(client, registered, monkeypatch, test_upload_dir):
+    _, headers = registered
+    monkeypatch.setattr(media_router.settings, "upload_dir", str(test_upload_dir))
+    uploaded = client.post(
+        "/api/v1/media",
+        headers=headers,
+        files={"file": ("short.mp4", b"short video", "video/mp4")},
+    )
+    assert uploaded.status_code == 201, uploaded.text
+
+    created = client.post(
+        "/api/v1/posts",
+        headers=headers,
+        json={
+            "content": "Một video ngắn",
+            "media_ids": [uploaded.json()["id"]],
+            "is_short": True,
+        },
+    )
+    assert created.status_code == 201, created.text
+    assert created.json()["is_short"] is True
+    assert created.json()["media"][0]["mime_type"] == "video/mp4"
+
+    regular = client.post(
+        "/api/v1/posts",
+        headers=headers,
+        json={"content": "Bài viết thường", "media_ids": []},
+    )
+    assert regular.status_code == 201, regular.text
+
+    shorts = client.get("/api/v1/feed/shorts", headers=headers)
+    assert shorts.status_code == 200, shorts.text
+    assert shorts.json()["total"] == 1
+    assert shorts.json()["items"][0]["id"] == created.json()["id"]
+
+
+def test_short_video_requires_exactly_one_video(
+    client, registered, monkeypatch, test_upload_dir
+):
+    _, headers = registered
+    missing_video = client.post(
+        "/api/v1/posts",
+        headers=headers,
+        json={"content": "Không có video", "media_ids": [], "is_short": True},
+    )
+    assert missing_video.status_code == 422
+
+    monkeypatch.setattr(media_router.settings, "upload_dir", str(test_upload_dir))
+    monkeypatch.setattr(
+        media_router,
+        "classify_image",
+        lambda _: ImageAuthenticityResult(fake_score=0.03, real_score=0.97),
+    )
+    image = client.post(
+        "/api/v1/media",
+        headers=headers,
+        files={"file": ("photo.png", b"image bytes", "image/png")},
+    )
+    assert image.status_code == 201, image.text
+    wrong_type = client.post(
+        "/api/v1/posts",
+        headers=headers,
+        json={"content": "Ảnh không phải short", "media_ids": [image.json()["id"]], "is_short": True},
+    )
+    assert wrong_type.status_code == 400
+
+
+def test_caption_assistant_combines_image_description_with_user_instruction(
+    client, registered, monkeypatch, test_upload_dir
+):
     _, headers = registered
     monkeypatch.setattr(media_router.settings, "upload_dir", str(test_upload_dir))
     monkeypatch.setattr(
@@ -300,17 +369,40 @@ def test_florence_caption_uses_an_owned_image(client, registered, monkeypatch, t
     client.patch(
         "/api/v1/users/me",
         headers=headers,
-        json={"ai_assistant_enabled": True},
+        json={"ai_assistant_enabled": True, "google_api_key": "test-google-key"},
     )
-    monkeypatch.setattr(ai_router, "suggest_image_caption", lambda _: "A caption from Florence")
+    mocked_florence = Mock(return_value="A person watching the sunset by the sea")
+    mocked_gemini = AsyncMock(return_value=AssistantResult(content="Hoàng hôn ôm lấy bình yên 🌅"))
+    monkeypatch.setattr(ai_router, "suggest_image_caption", mocked_florence)
+    monkeypatch.setattr(ai_router, "generate_response", mocked_gemini)
 
     response = client.post(
         "/api/v1/ai/caption-image",
         headers=headers,
-        json={"media_id": uploaded["id"]},
+        json={"media_id": uploaded["id"], "instruction": "Viết nhẹ nhàng, có một emoji"},
     )
     assert response.status_code == 200, response.text
-    assert response.json()["content"] == "A caption from Florence"
+    assert response.json() == {
+        "content": "Hoàng hôn ôm lấy bình yên 🌅",
+        "image_description": "A person watching the sunset by the sea",
+    }
+    first_prompt = mocked_gemini.await_args.kwargs["prompt"]
+    assert "A person watching the sunset by the sea" in first_prompt
+    assert "Viết nhẹ nhàng, có một emoji" in first_prompt
+
+    refined = client.post(
+        "/api/v1/ai/caption-image",
+        headers=headers,
+        json={
+            "media_id": uploaded["id"],
+            "instruction": "Rút gọn thêm",
+            "image_description": response.json()["image_description"],
+            "previous_caption": response.json()["content"],
+        },
+    )
+    assert refined.status_code == 200, refined.text
+    assert "Hoàng hôn ôm lấy bình yên" in mocked_gemini.await_args.kwargs["prompt"]
+    assert mocked_florence.call_count == 1
 
 
 def test_admin_moderates_report(client, registered):

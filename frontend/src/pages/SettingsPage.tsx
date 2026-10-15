@@ -149,7 +149,7 @@ export function SettingsPage() {
     </section>
     <section className="ai-setting-card surface">
       <div className="ai-setting-icon"><Bot /></div>
-      <div><b>AI Assistant</b><small>Gemini hỗ trợ nội dung; Florence-2-large gợi ý caption trực tiếp từ ảnh.</small><em>Caption ảnh chạy bằng model Hugging Face trên máy chủ.</em></div>
+      <div><b>AI Assistant</b><small>Trò chuyện với Gemini để tạo caption theo phong cách bạn muốn từ nội dung ảnh do Florence-2-large nhận diện.</small><em>Mô tả ảnh chạy bằng model Hugging Face trên máy chủ.</em></div>
       <button className={user.ai_assistant_enabled ? 'toggle-switch active' : 'toggle-switch'} onClick={toggleAi} disabled={aiBusy} role="switch" aria-checked={Boolean(user.ai_assistant_enabled)} aria-label="Bật hoặc tắt AI Assistant"><span /></button>
     </section>
     {notice && <p className="settings-notice settings-page-notice">{notice}</p>}

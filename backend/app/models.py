@@ -106,6 +106,9 @@ class Post(TimestampMixin, Base):
     author_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     content: Mapped[str] = mapped_column(String(500), default="")
     is_blocked: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    is_short: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="false", index=True
+    )
 
     author: Mapped[User] = relationship(back_populates="posts")
     media: Mapped[list["Media"]] = relationship(

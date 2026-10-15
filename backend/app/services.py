@@ -64,6 +64,7 @@ def post_out(db: Session, post: Post, viewer: User | None = None) -> PostOut:
         content=post.content,
         author=user_summary(post.author),
         media=[MediaOut.model_validate(item) for item in post.media],
+        is_short=post.is_short,
         created_at=post.created_at,
         updated_at=post.updated_at,
         likes_count=likes,

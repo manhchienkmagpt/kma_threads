@@ -10,6 +10,7 @@ export type User = {
 export type Media = { id: string; url: string; mime_type: string; size_bytes: number; created_at: string };
 export type Post = {
   id: string; content: string; author: User; media: Media[]; created_at: string; updated_at: string;
+  is_short: boolean;
   likes_count: number; replies_count: number; reposts_count: number;
   liked: boolean; reposted: boolean; bookmarked: boolean;
 };
@@ -25,3 +26,4 @@ export type Notification = {
 };
 export type AISource = { title: string; url: string };
 export type AIResponse = { content: string; sources: AISource[]; disclaimer?: string | null };
+export type AIImageCaptionResponse = { content: string; image_description: string };

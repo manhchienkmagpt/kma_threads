@@ -32,7 +32,7 @@ export function AIAssistantPanel({ postId }: { postId: string }) {
     <section className="ai-post-panel" aria-label="AI Assistant cho bài đăng">
       <div className="ai-post-actions">
         <button onClick={() => request('fact-check')} disabled={busy}><SearchCheck /> Fact-check</button>
-        <button onClick={() => request('summarize')} disabled={busy}><FileText /> Tóm tắt thread</button>
+        <button onClick={() => request('summarize')} disabled={busy}><FileText /> Tóm tắt bài viết</button>
         <button onClick={() => request('suggest-reply')} disabled={busy}><MessageSquareText /> Gợi ý phản hồi</button>
       </div>
       <form className="ai-question" onSubmit={ask}>

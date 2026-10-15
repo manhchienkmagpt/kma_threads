@@ -97,11 +97,14 @@ class MediaOut(ORMModel):
 class PostCreate(BaseModel):
     content: str = Field(default="", max_length=500)
     media_ids: list[uuid.UUID] = Field(default_factory=list, max_length=10)
+    is_short: bool = False
 
     @model_validator(mode="after")
     def content_or_media(self):
         if not self.content.strip() and not self.media_ids:
             raise ValueError("A post needs text or media")
+        if self.is_short and len(self.media_ids) != 1:
+            raise ValueError("A short video needs exactly one media item")
         return self
 
 
@@ -114,6 +117,7 @@ class PostOut(ORMModel):
     content: str
     author: UserSummary
     media: list[MediaOut] = []
+    is_short: bool = False
     created_at: datetime
     updated_at: datetime
     likes_count: int = 0
@@ -252,6 +256,23 @@ class AIPostQuestionRequest(BaseModel):
 
 class AIImageCaptionRequest(BaseModel):
     media_id: uuid.UUID
+    instruction: str = Field(min_length=2, max_length=500)
+    image_description: str | None = Field(default=None, min_length=1, max_length=500)
+    previous_caption: str | None = Field(default=None, min_length=1, max_length=500)
+
+    @model_validator(mode="after")
+    def validate_caption_context(self):
+        self.instruction = self.instruction.strip()
+        if len(self.instruction) < 2:
+            raise ValueError("Caption instruction cannot be blank")
+        if (self.image_description is None) != (self.previous_caption is None):
+            raise ValueError("Image description and previous caption must be provided together")
+        return self
+
+
+class AIImageCaptionResponse(BaseModel):
+    content: str
+    image_description: str
 
 
 class AISource(BaseModel):

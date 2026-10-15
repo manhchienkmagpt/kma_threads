@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { api, clearSession } from './api';
 import type { User } from './types';
 import { AppShell } from './components/AppShell';
@@ -10,6 +10,8 @@ import { SearchPage } from './pages/SearchPage';
 import { ActivityPage } from './pages/ActivityPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AdminPage } from './pages/AdminPage';
+import { ShortsPage } from './pages/ShortsPage';
+import { PostPage } from './pages/PostPage';
 
 type AuthValue = { user: User | null; setUser: (user: User | null) => void; logout: () => Promise<void> };
 const AuthContext = createContext<AuthValue | null>(null);
@@ -21,9 +23,22 @@ function Protected() {
 }
 
 export default function App() {
-  const [user, setUser] = useState<User | null>(() => {
+  const [user, updateUser] = useState<User | null>(() => {
     try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch { return null; }
   });
+  const setUser = useCallback((next: User | null) => {
+    updateUser(next);
+    if (next) localStorage.setItem('user', JSON.stringify(next));
+    else localStorage.removeItem('user');
+  }, []);
+  useEffect(() => {
+    if (!user?.id || !localStorage.getItem('access_token')) return;
+    let active = true;
+    api<User>('/users/me').then((next) => { if (active) setUser(next); }).catch(() => {
+      if (active && !localStorage.getItem('access_token')) setUser(null);
+    });
+    return () => { active = false; };
+  }, [user?.id, setUser]);
   const logout = async () => {
     const refresh_token = localStorage.getItem('refresh_token');
     if (refresh_token) await api('/auth/logout', { method: 'POST', body: JSON.stringify({ refresh_token }) }).catch(() => null);
@@ -33,10 +48,15 @@ export default function App() {
     <AuthContext.Provider value={{ user, setUser, logout }}>
       <Routes>
         <Route path="/auth" element={user ? <Navigate to="/" replace /> : <AuthPage />} />
+        <Route path="/forgot-password" element={user ? <Navigate to="/" replace /> : <AuthPage initialMode="forgot" />} />
+        <Route path="/reset-password" element={user ? <Navigate to="/" replace /> : <AuthPage initialMode="reset" />} />
         <Route element={<Protected />}>
           <Route path="/" element={<FeedPage mode="home" />} />
           <Route path="/following" element={<FeedPage mode="following" />} />
+          <Route path="/posts" element={<FeedPage mode="all" />} />
+          <Route path="/posts/:postId" element={<PostPage />} />
           <Route path="/saved" element={<FeedPage mode="saved" />} />
+          <Route path="/shorts" element={<ShortsPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/activity" element={<ActivityPage />} />
           <Route path="/settings" element={<SettingsPage />} />
